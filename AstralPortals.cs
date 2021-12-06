@@ -4,9 +4,10 @@ using System;
 using System.Linq;
 using System.Reflection;
 using UnityEngine;
+using VRC.SDKBase;
 using Logger = Astrum.AstralCore.Logger;
 
-[assembly: MelonInfo(typeof(Astrum.AstralPortals), "AstralPortals", "0.1.0", downloadLink: "github.com/Astrum-Project/AstralPortals")]
+[assembly: MelonInfo(typeof(Astrum.AstralPortals), "AstralPortals", "0.2.0", downloadLink: "github.com/Astrum-Project/AstralPortals")]
 [assembly: MelonGame("VRChat", "VRChat")]
 [assembly: MelonColor(ConsoleColor.DarkMagenta)]
 
@@ -18,17 +19,14 @@ namespace Astrum
 
         public static MethodInfo m_ConfigurePortal;
 
-        //public static bool infinite;
-        //public static bool theft;
-        //public static bool multi;
-        public static bool floor = true;
         public static bool log = true;
-        //public static bool spoof = true;
+        public static bool floor = true;
+        public static bool theft = false;
+        public static PortalMode mode = PortalMode.Normal;
 
         public override void OnApplicationStart()
         {
-            m_ConfigurePortal = AppDomain.CurrentDomain.GetAssemblies()
-                .First(x => x.GetName().Name == "Assembly-CSharp")
+            m_ConfigurePortal = AstralCore.Hooks.Hooks.AssemblyCSharp
                 .GetTypes()
                 .Where(x => x.BaseType == typeof(MonoBehaviour))
                 .SelectMany(x => x.GetMethods())
@@ -48,8 +46,10 @@ namespace Astrum
             );
 
             MelonPreferences_Category category = MelonPreferences.CreateCategory("Astrum-AstralPortals", "Astral Portals");
-            category.CreateEntry("floor", true, "Floor Portals");
             category.CreateEntry("log", true, "Log Portals");
+            category.CreateEntry("floor", true, "Floor Portals");
+            category.CreateEntry("theft", false, "Hijack Portals");
+            category.CreateEntry("mode", PortalMode.Normal, "Portal Mode");
 
             OnPreferencesLoaded();
         }
@@ -58,14 +58,15 @@ namespace Astrum
         public override void OnPreferencesLoaded()
         {
             MelonPreferences_Category category = MelonPreferences.GetCategory("Astrum-AstralPortals");
-            floor = category.GetEntry<bool>("floor").Value;
             log = category.GetEntry<bool>("log").Value;
+            floor = category.GetEntry<bool>("floor").Value;
+            theft = category.GetEntry<bool>("theft").Value;
+            mode = category.GetEntry<PortalMode>("mode").Value;
         }
 
         private static System.Collections.IEnumerator SetupFloortal(Transform portal)
         {
-            yield return null;
-            yield return null;
+            yield return new WaitForSeconds(1);
 
             portal.localScale = new Vector3(1, 0.75f, 1);
             portal.position += portal.forward;
@@ -95,6 +96,27 @@ namespace Astrum
         private static void HookConfigurePortalPost(MonoBehaviour __instance)
         {
             MelonCoroutines.Start(SetupFloortal(__instance.transform));
+
+            if (theft && Networking.GetOwner(__instance.gameObject) != Networking.LocalPlayer)
+                Networking.SetOwner(Networking.LocalPlayer, __instance.gameObject);
+
+            if (mode == PortalMode.Blank)
+                UnityEngine.Object.Destroy(__instance);
+            else if (mode == PortalMode.Frozen)
+                MelonCoroutines.Start(FreezePortal(__instance));
+        }
+
+        private static System.Collections.IEnumerator FreezePortal(MonoBehaviour portal)
+        {
+            yield return new WaitForSeconds(1);
+            UnityEngine.Object.Destroy(portal);
+        }
+
+        public enum PortalMode
+        {
+            Blank,
+            Frozen,
+            Normal
         }
     }
 }
