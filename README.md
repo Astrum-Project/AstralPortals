@@ -6,7 +6,7 @@
 - MelonPrefs
 
 # Todo
-- [ ] Infinite duration
-- [ ] Take ownership
-- [ ] Allow multiple
+- [x] Infinite duration
+- [x] Take ownership
+- [x] Allow multiple
 - [ ] Hide details
