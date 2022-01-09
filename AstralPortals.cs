@@ -7,7 +7,7 @@ using UnityEngine;
 using VRC.SDKBase;
 using Logger = Astrum.AstralCore.Logger;
 
-[assembly: MelonInfo(typeof(Astrum.AstralPortals), "AstralPortals", "0.2.0", downloadLink: "github.com/Astrum-Project/AstralPortals")]
+[assembly: MelonInfo(typeof(Astrum.AstralPortals), "AstralPortals", "0.2.1", downloadLink: "github.com/Astrum-Project/AstralPortals")]
 [assembly: MelonGame("VRChat", "VRChat")]
 [assembly: MelonColor(ConsoleColor.DarkMagenta)]
 
@@ -82,14 +82,14 @@ namespace Astrum
             icons.Find("Quad").localPosition = new Vector3(-0.5f, 1.86f, 0);
         }
 
-        private static void HookConfigurePortalPre(MonoBehaviour __3) 
+        private static void HookConfigurePortalPre(string __0, string __1, MonoBehaviour __3) 
         {
             Player player = new Player(__3);
 
             if (log)
             {
-                Logger.Info(player.APIUser.displayName + " dropped a portal");
-                MelonCoroutines.Start(AstralCore.Managers.LogManager.DisplayOnScreen($"<color=#5ab2a8>{player.APIUser.displayName}</color> dropped a portal", 5f));
+                Logger.Notif(player.APIUser.displayName + " dropped a portal");
+                Logger.Info($"{__0}:{__1}");
             }
         }
 
