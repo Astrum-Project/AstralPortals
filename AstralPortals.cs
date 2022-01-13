@@ -7,7 +7,7 @@ using UnityEngine;
 using VRC.SDKBase;
 using Logger = Astrum.AstralCore.Logger;
 
-[assembly: MelonInfo(typeof(Astrum.AstralPortals), "AstralPortals", "0.2.1", downloadLink: "github.com/Astrum-Project/AstralPortals")]
+[assembly: MelonInfo(typeof(Astrum.AstralPortals), "AstralPortals", "0.2.2", downloadLink: "github.com/Astrum-Project/AstralPortals")]
 [assembly: MelonGame("VRChat", "VRChat")]
 [assembly: MelonColor(ConsoleColor.DarkMagenta)]
 
@@ -68,6 +68,8 @@ namespace Astrum
         {
             yield return new WaitForSeconds(1);
 
+            if (portal == null) yield break;
+
             portal.localScale = new Vector3(1, 0.75f, 1);
             portal.position += portal.forward;
             portal.rotation = Quaternion.Euler(270, portal.rotation.eulerAngles.y, portal.rotation.eulerAngles.z);
@@ -109,7 +111,9 @@ namespace Astrum
         private static System.Collections.IEnumerator FreezePortal(MonoBehaviour portal)
         {
             yield return new WaitForSeconds(1);
-            UnityEngine.Object.Destroy(portal);
+
+            if (portal != null)
+                UnityEngine.Object.Destroy(portal);
         }
 
         public enum PortalMode
